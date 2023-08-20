@@ -3,7 +3,6 @@ package kvstorehandler
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/vbyazilim/kvstore/src/internal/kverror"
@@ -46,26 +45,27 @@ func (h *kvstoreHandler) List(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
-	fmt.Println("serviceResponse", serviceResponse)
-	// if serviceResponse == nil {
-	// 	h.JSON(
-	// 		w,
-	// 		http.StatusNotFound,
-	// 		map[string]string{"error": "nothing found"},
-	// 	)
-	// }
-	//
-	// handlerResponse := make(ListResponse, len(*serviceResponse))
-	// for _, item := range *serviceResponse {
-	// 	handlerResponse = append(handlerResponse, ItemResponse{
-	// 		Key:   item.Key,
-	// 		Value: item.Value,
-	// 	})
-	// }
-	//
-	// h.JSON(
-	// 	w,
-	// 	http.StatusOK,
-	// 	handlerResponse,
-	// )
+
+	var handlerResponse ListResponse
+	for _, item := range *serviceResponse {
+		handlerResponse = append(handlerResponse, ItemResponse{
+			Key:   item.Key,
+			Value: item.Value,
+		})
+	}
+
+	if len(handlerResponse) == 0 {
+		h.JSON(
+			w,
+			http.StatusNotFound,
+			map[string]string{"error": "nothing found"},
+		)
+		return
+	}
+
+	h.JSON(
+		w,
+		http.StatusOK,
+		handlerResponse,
+	)
 }

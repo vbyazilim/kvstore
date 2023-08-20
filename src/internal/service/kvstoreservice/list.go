@@ -11,11 +11,14 @@ func (s *kvStoreService) List(ctx context.Context) (*ListResponse, error) {
 	default:
 		items := s.storage.List()
 		response := make(ListResponse, len(items))
+
+		var i int
 		for k, v := range items {
-			response = append(response, ItemResponse{
+			response[i] = ItemResponse{
 				Key:   k,
 				Value: v,
-			})
+			}
+			i++
 		}
 		return &response, nil
 	}

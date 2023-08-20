@@ -2,14 +2,20 @@ package kvstorehandler
 
 import (
 	"log/slog"
+	"net/http"
 	"time"
 
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
-	"github.com/vbyazilim/kvstore/src/internal/transport"
 	"github.com/vbyazilim/kvstore/src/internal/transport/http/basehttphandler"
 )
 
-var _ transport.KVStoreHTTPHandler = (*kvstoreHandler)(nil) // compile time proof
+var _ KVStoreHTTPHandler = (*kvstoreHandler)(nil) // compile time proof
+
+// KVStoreHTTPHandler defines /store/ http handler behaviours.
+type KVStoreHTTPHandler interface {
+	Set(http.ResponseWriter, *http.Request)
+	List(http.ResponseWriter, *http.Request)
+}
 
 type kvstoreHandler struct {
 	basehttphandler.Handler
@@ -49,7 +55,7 @@ func WithLogger(l *slog.Logger) StoreHandlerOption {
 }
 
 // New instantiates new kvstoreHandler instance.
-func New(options ...StoreHandlerOption) transport.KVStoreHTTPHandler {
+func New(options ...StoreHandlerOption) KVStoreHTTPHandler {
 	kvsh := &kvstoreHandler{
 		Handler: basehttphandler.Handler{},
 	}
