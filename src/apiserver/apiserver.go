@@ -81,6 +81,7 @@ func New(options ...Option) error {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/set", kvStoreHandler.Set)
+	mux.HandleFunc("/list", kvStoreHandler.List)
 
 	api := &http.Server{
 		Addr:         ":8000",

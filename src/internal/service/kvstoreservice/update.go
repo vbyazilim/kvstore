@@ -3,11 +3,9 @@ package kvstoreservice
 import (
 	"context"
 	"fmt"
-
-	"github.com/vbyazilim/kvstore/src/internal/service"
 )
 
-func (s *kvStoreService) Update(ctx context.Context, sr *service.UpdateRequest) (*service.ItemResponse, error) {
+func (s *kvStoreService) Update(ctx context.Context, sr *UpdateRequest) (*ItemResponse, error) {
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -16,7 +14,7 @@ func (s *kvStoreService) Update(ctx context.Context, sr *service.UpdateRequest) 
 		if err != nil {
 			return nil, fmt.Errorf("kvstoreservice.Set storage.Update err: %w", err)
 		}
-		return &service.ItemResponse{
+		return &ItemResponse{
 			Key:   sr.Key,
 			Value: value,
 		}, nil

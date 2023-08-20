@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/vbyazilim/kvstore/src/internal/service"
+	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 	"github.com/vbyazilim/kvstore/src/internal/transport"
 	"github.com/vbyazilim/kvstore/src/internal/transport/http/basehttphandler"
 )
@@ -14,14 +14,14 @@ var _ transport.KVStoreHTTPHandler = (*kvstoreHandler)(nil) // compile time proo
 type kvstoreHandler struct {
 	basehttphandler.Handler
 
-	service service.Servicer
+	service kvstoreservice.KVStoreService
 }
 
 // StoreHandlerOption represents store handler option type.
 type StoreHandlerOption func(*kvstoreHandler)
 
 // WithService sets service option.
-func WithService(srvc service.Servicer) StoreHandlerOption {
+func WithService(srvc kvstoreservice.KVStoreService) StoreHandlerOption {
 	return func(s *kvstoreHandler) {
 		s.service = srvc
 	}

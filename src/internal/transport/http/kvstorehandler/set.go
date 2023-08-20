@@ -4,21 +4,19 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/vbyazilim/kvstore/src/internal/kverror"
-	"github.com/vbyazilim/kvstore/src/internal/service"
+	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 )
 
 func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		errMessage := fmt.Sprintf("method %s not allowed", r.Method)
 		h.JSON(
 			w,
 			http.StatusMethodNotAllowed,
-			map[string]string{"error": errMessage},
+			map[string]string{"error": "method " + r.Method + " not allowed"},
 		)
 		return
 	}
@@ -73,7 +71,7 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.CancelTimeout)
 	defer cancel()
 
-	serviceRequest := service.SetRequest{
+	serviceRequest := kvstoreservice.SetRequest{
 		Key:   handlerRequest.Key,
 		Value: handlerRequest.Value,
 	}
@@ -99,8 +97,6 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 				h.JSON(w, http.StatusConflict, map[string]string{"error": clientMessage})
 				return
 			}
-			h.JSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
-			return
 		}
 
 		h.JSON(

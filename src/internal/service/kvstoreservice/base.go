@@ -1,11 +1,21 @@
 package kvstoreservice
 
 import (
-	"github.com/vbyazilim/kvstore/src/internal/service"
+	"context"
+
 	"github.com/vbyazilim/kvstore/src/internal/storage"
 )
 
-var _ service.Servicer = (*kvStoreService)(nil) // compile time proof
+var _ KVStoreService = (*kvStoreService)(nil) // compile time proof
+
+// KVStoreService defines service behaviours.
+type KVStoreService interface {
+	Set(context.Context, *SetRequest) (*ItemResponse, error)
+	Get(context.Context, string) (*ItemResponse, error)
+	Update(context.Context, *UpdateRequest) (*ItemResponse, error)
+	Delete(context.Context, string) error
+	List(context.Context) (*ListResponse, error)
+}
 
 type kvStoreService struct {
 	storage storage.Storer
@@ -22,7 +32,7 @@ func WithStorage(strg storage.Storer) ServiceOption {
 }
 
 // New instantiates new service instance.
-func New(options ...ServiceOption) service.Servicer {
+func New(options ...ServiceOption) KVStoreService {
 	kvs := &kvStoreService{}
 
 	for _, o := range options {
