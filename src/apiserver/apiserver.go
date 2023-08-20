@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -15,6 +16,7 @@ import (
 	"github.com/vbyazilim/kvstore/src/internal/storage"
 	"github.com/vbyazilim/kvstore/src/internal/storage/memory/kvstorage"
 	"github.com/vbyazilim/kvstore/src/internal/transport/http/kvstorehandler"
+	"github.com/vbyazilim/kvstore/src/releaseinfo"
 )
 
 // constants.
@@ -24,6 +26,8 @@ const (
 	ServerReadTimeout    = 10 * time.Second
 	ServerWriteTimeout   = 10 * time.Second
 	ServerIdleTimeout    = 60 * time.Second
+
+	apiV1Prefix = "/api/v1"
 )
 
 type apiServer struct {
@@ -80,11 +84,37 @@ func New(options ...Option) error {
 	)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/set", kvStoreHandler.Set)
-	mux.HandleFunc("/get", kvStoreHandler.Get)
-	mux.HandleFunc("/update", kvStoreHandler.Update)
-	mux.HandleFunc("/delete", kvStoreHandler.Delete)
-	mux.HandleFunc("/list", kvStoreHandler.List)
+
+	mux.HandleFunc("/healthz/live", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		j, _ := json.Marshal(map[string]any{
+			"server":            apisrvr.serverEnv,
+			"version":           releaseinfo.Version,
+			"build_information": releaseinfo.BuildInformation,
+			"message":           "liveness is OK!, server is ready to accept connections",
+		})
+		_, _ = w.Write(j)
+	})
+	mux.HandleFunc("/healthz/ready", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		j, _ := json.Marshal(map[string]any{
+			"server":            apisrvr.serverEnv,
+			"version":           releaseinfo.Version,
+			"build_information": releaseinfo.BuildInformation,
+			"message":           "readiness is OK!, server is ready to accept connections",
+		})
+		_, _ = w.Write(j)
+	})
+
+	mux.HandleFunc(apiV1Prefix+"/set", kvStoreHandler.Set)
+	mux.HandleFunc(apiV1Prefix+"/get", kvStoreHandler.Get)
+	mux.HandleFunc(apiV1Prefix+"/update", kvStoreHandler.Update)
+	mux.HandleFunc(apiV1Prefix+"/delete", kvStoreHandler.Delete)
+	mux.HandleFunc(apiV1Prefix+"/list", kvStoreHandler.List)
 
 	api := &http.Server{
 		Addr:         ":8000",
