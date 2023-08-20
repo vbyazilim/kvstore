@@ -3,10 +3,12 @@ package kvstorehandler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 
+	"github.com/vbyazilim/kvstore/src/internal/kverror"
 	"github.com/vbyazilim/kvstore/src/internal/service"
 )
 
@@ -78,6 +80,29 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 
 	serviceResponse, err := h.service.Set(ctx, &serviceRequest)
 	if err != nil {
+		var kvErr *kverror.Error
+
+		if errors.As(err, &kvErr) {
+			clientMessage := kvErr.Message
+			if kvErr.Data != nil {
+				data, ok := kvErr.Data.(string)
+				if ok {
+					clientMessage = clientMessage + ", " + data
+				}
+			}
+
+			if kvErr.Loggable {
+				h.Logger.Error("kvstorehandler Set", "err", clientMessage)
+			}
+
+			if kvErr == kverror.ErrKeyExists {
+				h.JSON(w, http.StatusConflict, map[string]string{"error": clientMessage})
+				return
+			}
+			h.JSON(w, http.StatusInternalServerError, map[string]string{"error": err.Error()})
+			return
+		}
+
 		h.JSON(
 			w,
 			http.StatusInternalServerError,
