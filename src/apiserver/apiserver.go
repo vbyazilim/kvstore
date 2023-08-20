@@ -3,6 +3,7 @@ package apiserver
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,23 +19,64 @@ import (
 
 // constants.
 const (
-	ShutdownTimeout    = 10 * time.Second
-	ServerReadTimeout  = 10 * time.Second
-	ServerWriteTimeout = 10 * time.Second
-	ServerIdleTimeout  = 60 * time.Second
+	ContextCancelTimeout = 5 * time.Second
+	ShutdownTimeout      = 10 * time.Second
+	ServerReadTimeout    = 10 * time.Second
+	ServerWriteTimeout   = 10 * time.Second
+	ServerIdleTimeout    = 60 * time.Second
 )
 
+type apiServer struct {
+	db        storage.MemoryDB
+	logger    *slog.Logger
+	serverEnv string
+}
+
+// Option represents api server option type.
+type Option func(*apiServer)
+
+// WithLogger sets logger option.
+func WithLogger(l *slog.Logger) Option {
+	return func(s *apiServer) {
+		s.logger = l
+	}
+}
+
+// WithServerEnv sets serverEnv option.
+func WithServerEnv(env string) Option {
+	return func(s *apiServer) {
+		s.serverEnv = env
+	}
+}
+
 // New instantiates new server instance.
-func New() error {
-	db := storage.MemoryDB(make(map[string]any))
+func New(options ...Option) error {
+	apisrvr := &apiServer{
+		db:     storage.MemoryDB(make(map[string]any)),        // default db
+		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)), // default logger
+	}
+
+	for _, o := range options {
+		o(apisrvr)
+	}
+
+	if apisrvr.serverEnv == "" {
+		apisrvr.serverEnv = "production" // default server environment
+	}
+
+	logger := apisrvr.logger
+
 	storage := kvstorage.New(
-		kvstorage.WithMemoryDB(db),
+		kvstorage.WithMemoryDB(apisrvr.db),
 	)
 	service := kvstoreservice.New(
 		kvstoreservice.WithStorage(storage),
 	)
 	kvStoreHandler := kvstorehandler.New(
 		kvstorehandler.WithService(service),
+		kvstorehandler.WithContextTimeout(ContextCancelTimeout),
+		kvstorehandler.WithServerEnv(apisrvr.serverEnv),
+		kvstorehandler.WithLogger(logger),
 	)
 
 	mux := http.NewServeMux()
@@ -56,7 +98,7 @@ func New() error {
 	wg.Add(1)
 
 	go func() {
-		fmt.Println("listening", api.Addr)
+		logger.Info("starting api server", "listening", api.Addr, "env", apisrvr.serverEnv)
 		apiError <- api.ListenAndServe()
 	}()
 
@@ -64,16 +106,17 @@ func New() error {
 	case err := <-apiError:
 		return fmt.Errorf("listen and server err: %w", err)
 	case sig := <-shutdown:
-		fmt.Println("shut down", sig)
+		logger.Info("starting shutdown", "pid", sig)
+		defer logger.Info("shutdown completed", "pid", sig)
 
 		ctx, cancel := context.WithTimeout(context.Background(), ShutdownTimeout)
 		defer cancel()
 
 		if err := api.Shutdown(ctx); err != nil {
 			if errr := api.Close(); errr != nil {
-				fmt.Println("[err] api close", errr)
+				logger.Error("api close", "err", errr)
 			}
-			return fmt.Errorf("[err] could not stop server gracefully: %w", err)
+			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 
 		wg.Done()
