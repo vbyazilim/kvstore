@@ -14,6 +14,7 @@ var _ KVStoreHTTPHandler = (*kvstoreHandler)(nil) // compile time proof
 // KVStoreHTTPHandler defines /store/ http handler behaviours.
 type KVStoreHTTPHandler interface {
 	Set(http.ResponseWriter, *http.Request)
+	Get(http.ResponseWriter, *http.Request)
 	List(http.ResponseWriter, *http.Request)
 }
 
