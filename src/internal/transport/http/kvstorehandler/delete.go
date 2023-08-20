@@ -8,8 +8,8 @@ import (
 	"github.com/vbyazilim/kvstore/src/internal/kverror"
 )
 
-func (h *kvstoreHandler) Get(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+func (h *kvstoreHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
 		h.JSON(
 			w,
 			http.StatusMethodNotAllowed,
@@ -42,8 +42,7 @@ func (h *kvstoreHandler) Get(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.CancelTimeout)
 	defer cancel()
 
-	serviceResponse, err := h.service.Get(ctx, key)
-	if err != nil {
+	if err := h.service.Delete(ctx, key); err != nil {
 		var kvErr *kverror.Error
 
 		if errors.As(err, &kvErr) {
@@ -56,7 +55,7 @@ func (h *kvstoreHandler) Get(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if kvErr.Loggable {
-				h.Logger.Error("kvstorehandler Get service.Get", "err", clientMessage)
+				h.Logger.Error("kvstorehandler Delete service.Delete", "err", clientMessage)
 			}
 
 			if kvErr == kverror.ErrKeyNotFound {
@@ -72,14 +71,6 @@ func (h *kvstoreHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handlerResponse := ItemResponse{
-		Key:   serviceResponse.Key,
-		Value: serviceResponse.Value,
-	}
-
-	h.JSON(
-		w,
-		http.StatusOK,
-		handlerResponse,
-	)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusNoContent)
 }

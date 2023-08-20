@@ -34,7 +34,7 @@ func (h *kvstoreHandler) List(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if kvErr.Loggable {
-				h.Logger.Error("kvstorehandler Set", "err", clientMessage)
+				h.Logger.Error("kvstorehandler List service.List", "err", clientMessage)
 			}
 		}
 

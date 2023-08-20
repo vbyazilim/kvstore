@@ -11,8 +11,8 @@ import (
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 )
 
-func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+func (h *kvstoreHandler) Update(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
 		h.JSON(
 			w,
 			http.StatusMethodNotAllowed,
@@ -40,7 +40,7 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var handlerRequest SetRequest
+	var handlerRequest UpdateRequest
 	if err = json.Unmarshal(body, &handlerRequest); err != nil {
 		h.JSON(
 			w,
@@ -71,21 +71,12 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.CancelTimeout)
 	defer cancel()
 
-	if _, err = h.service.Get(ctx, handlerRequest.Key); err == nil {
-		h.JSON(
-			w,
-			http.StatusConflict,
-			map[string]string{"error": "can not set, '" + handlerRequest.Key + "' already exists"},
-		)
-		return
-	}
-
-	serviceRequest := kvstoreservice.SetRequest{
+	serviceRequest := kvstoreservice.UpdateRequest{
 		Key:   handlerRequest.Key,
 		Value: handlerRequest.Value,
 	}
 
-	serviceResponse, err := h.service.Set(ctx, &serviceRequest)
+	serviceResponse, err := h.service.Update(ctx, &serviceRequest)
 	if err != nil {
 		var kvErr *kverror.Error
 
@@ -99,11 +90,11 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if kvErr.Loggable {
-				h.Logger.Error("kvstorehandler Set service.Set", "err", clientMessage)
+				h.Logger.Error("kvstorehandler Update service.Update", "err", clientMessage)
 			}
 
-			if kvErr == kverror.ErrKeyExists {
-				h.JSON(w, http.StatusConflict, map[string]string{"error": clientMessage})
+			if kvErr == kverror.ErrKeyNotFound {
+				h.JSON(w, http.StatusNotFound, map[string]string{"error": clientMessage})
 				return
 			}
 		}
@@ -123,7 +114,7 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 
 	h.JSON(
 		w,
-		http.StatusCreated,
+		http.StatusOK,
 		handlerResponse,
 	)
 }
