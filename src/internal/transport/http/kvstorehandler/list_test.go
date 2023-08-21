@@ -2,6 +2,7 @@ package kvstorehandler_test
 
 import (
 	"context"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -14,13 +15,18 @@ import (
 
 func TestListInvalidMethod(t *testing.T) {
 	handler := kvstorehandler.New()
-	req := httptest.NewRequest("DELETE", "/key", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/key", nil)
 	w := httptest.NewRecorder()
 
 	handler.List(w, req)
 
-	if w.Code != 405 && strings.Contains(w.Body.String(), "method not allowed") {
-		t.Error("code not equal")
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusMethodNotAllowed, w.Code)
+	}
+
+	shouldContain := "method DELETE not allowed"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
@@ -32,17 +38,18 @@ func TestListTimeout(t *testing.T) {
 		}),
 	)
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 
 	handler.List(w, req)
 
-	if w.Code != 500 {
-		t.Error("code not equal")
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "context deadline exceeded") {
-		t.Error("body not equal")
+	shouldContain := "context deadline exceeded"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
@@ -54,21 +61,22 @@ func TestListErrUnknown(t *testing.T) {
 		kvstorehandler.WithLogger(logger),
 	)
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 
 	handler.List(w, req)
 
-	if w.Code != 500 {
-		t.Error("code not equal")
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "unknown error") {
-		t.Error("body not equal")
+	shouldContain := "unknown error"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
-func TestList(t *testing.T) {
+func TestListSuccess(t *testing.T) {
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),
@@ -82,16 +90,17 @@ func TestList(t *testing.T) {
 		}),
 	)
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 
 	handler.List(w, req)
 
-	if w.Code != 200 {
-		t.Error("code not equal")
+	if w.Code != http.StatusOK {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusOK, w.Code)
 	}
 
-	if w.Body.String() != `[{"key":"test","value":"test"}]` {
-		t.Error("body not equal")
+	shouldEqual := `[{"key":"test","value":"test"}]`
+	if w.Body.String() != shouldEqual {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldEqual, w.Body.String())
 	}
 }

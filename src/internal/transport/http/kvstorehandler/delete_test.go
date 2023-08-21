@@ -14,41 +14,52 @@ import (
 
 func TestDeleteInvalidMethod(t *testing.T) {
 	handler := kvstorehandler.New()
-	req := httptest.NewRequest("GET", "/key", nil)
+	req := httptest.NewRequest(http.MethodGet, "/key", nil)
 	w := httptest.NewRecorder()
 
 	handler.Delete(w, req)
 
-	if w.Code != http.StatusMethodNotAllowed && strings.Contains(w.Body.String(), "method not allowed") {
-		t.Error("code not equal")
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusMethodNotAllowed, w.Code)
+	}
+
+	shouldContain := "method GET not allowed"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
 func TestDeleteQueryParamRequired(t *testing.T) {
 	handler := kvstorehandler.New()
-	req := httptest.NewRequest("DELETE", "/", nil)
-	w := httptest.NewRecorder()
-
-	handler.Delete(w, req)
-
-	if w.Code != http.StatusNotFound && strings.Contains(w.Body.String(), "key query param required") {
-		t.Error("code not equal")
-	}
-}
-
-func TestDeleteQueryParamKeyNotFound(t *testing.T) {
-	handler := kvstorehandler.New()
-	req := httptest.NewRequest("DELETE", "/?foo=test", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/", nil)
 	w := httptest.NewRecorder()
 
 	handler.Delete(w, req)
 
 	if w.Code != http.StatusNotFound {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNotFound, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "key not present") {
-		t.Error("body not equal")
+	shouldContain := "key query param required"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
+	}
+}
+
+func TestDeleteQueryParamKeyNotFound(t *testing.T) {
+	handler := kvstorehandler.New()
+	req := httptest.NewRequest(http.MethodDelete, "/?foo=test", nil)
+	w := httptest.NewRecorder()
+
+	handler.Delete(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNotFound, w.Code)
+	}
+
+	shouldContain := "key not present"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
@@ -60,17 +71,18 @@ func TestDeleteTimeout(t *testing.T) {
 		}),
 	)
 
-	req := httptest.NewRequest("DELETE", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Delete(w, req)
 
 	if w.Code != http.StatusInternalServerError {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "context deadline exceeded") {
-		t.Error("body not equal")
+	shouldContain := "context deadline exceeded"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
@@ -82,23 +94,23 @@ func TestDeleteErrUnknown(t *testing.T) {
 		kvstorehandler.WithLogger(logger),
 	)
 
-	req := httptest.NewRequest("DELETE", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Delete(w, req)
 
 	if w.Code != http.StatusInternalServerError {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "unknown error") {
-		t.Error("body not equal")
+	shouldContain := "unknown error"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
 func TestDeleteErrKeyNotFound(t *testing.T) {
-	// ignore error.
-	_ = kverror.ErrKeyNotFound.AddData("key=test")
+	_ = kverror.ErrKeyNotFound.AddData("key=test") // ignore error.
 
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
@@ -107,43 +119,43 @@ func TestDeleteErrKeyNotFound(t *testing.T) {
 		kvstorehandler.WithLogger(logger),
 	)
 
-	req := httptest.NewRequest("DELETE", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Delete(w, req)
 
 	if w.Code != http.StatusNotFound {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNotFound, w.Code)
 	}
 
 	if !strings.Contains(w.Body.String(), "key not found") {
 		t.Error("body not equal")
 	}
 
-	if !strings.Contains(w.Body.String(), "key=test") {
-		t.Error("body not equal")
+	shouldContain := "key=test"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 
-	// ignore error.
-	_ = kverror.ErrKeyNotFound.DestoryData()
+	_ = kverror.ErrKeyNotFound.DestoryData() // ignore error.
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteSuccess(t *testing.T) {
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),
 	)
 
-	req := httptest.NewRequest("DELETE", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Delete(w, req)
 
 	if w.Code != http.StatusNoContent {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNoContent, w.Code)
 	}
 
-	if w.Body.String() != "" {
-		t.Error("body not equal")
+	if w.Body.Len() != 0 {
+		t.Errorf("wrong body size, want: 0, got: %d", w.Body.Len())
 	}
 }

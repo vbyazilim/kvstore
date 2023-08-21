@@ -15,41 +15,52 @@ import (
 
 func TestGetInvalidMethod(t *testing.T) {
 	handler := kvstorehandler.New()
-	req := httptest.NewRequest("DELETE", "/key", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/key", nil)
 	w := httptest.NewRecorder()
 
 	handler.Get(w, req)
 
-	if w.Code != http.StatusMethodNotAllowed && strings.Contains(w.Body.String(), "method not allowed") {
-		t.Error("code not equal")
+	if w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusMethodNotAllowed, w.Code)
+	}
+
+	shouldContain := "method DELETE not allowed"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
 func TestGetQueryParamRequired(t *testing.T) {
 	handler := kvstorehandler.New()
-	req := httptest.NewRequest("GET", "/", nil)
-	w := httptest.NewRecorder()
-
-	handler.Get(w, req)
-
-	if w.Code != http.StatusNotFound && strings.Contains(w.Body.String(), "key query param required") {
-		t.Error("code not equal")
-	}
-}
-
-func TestGetQueryParamKeyNotFound(t *testing.T) {
-	handler := kvstorehandler.New()
-	req := httptest.NewRequest("GET", "/?foo=test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	w := httptest.NewRecorder()
 
 	handler.Get(w, req)
 
 	if w.Code != http.StatusNotFound {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNotFound, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "key not present") {
-		t.Error("body not equal")
+	shouldContain := "key query param required"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
+	}
+}
+
+func TestGetQueryParamKeyNotFound(t *testing.T) {
+	handler := kvstorehandler.New()
+	req := httptest.NewRequest(http.MethodGet, "/?foo=test", nil)
+	w := httptest.NewRecorder()
+
+	handler.Get(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNotFound, w.Code)
+	}
+
+	shouldContain := "key not present"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
@@ -61,17 +72,18 @@ func TestGetTimeout(t *testing.T) {
 		}),
 	)
 
-	req := httptest.NewRequest("GET", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Get(w, req)
 
 	if w.Code != http.StatusInternalServerError {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "context deadline exceeded") {
-		t.Error("body not equal")
+	shouldContain := "context deadline exceeded"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
@@ -83,23 +95,23 @@ func TestGetErrUnknown(t *testing.T) {
 		kvstorehandler.WithLogger(logger),
 	)
 
-	req := httptest.NewRequest("GET", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Get(w, req)
 
 	if w.Code != http.StatusInternalServerError {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "unknown error") {
-		t.Error("body not equal")
+	shouldContain := "unknown error"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 }
 
 func TestGetErrKeyNotFound(t *testing.T) {
-	// ignore error.
-	_ = kverror.ErrKeyNotFound.AddData("key=test")
+	_ = kverror.ErrKeyNotFound.AddData("key=test") // ignore error.
 
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
@@ -108,28 +120,29 @@ func TestGetErrKeyNotFound(t *testing.T) {
 		kvstorehandler.WithLogger(logger),
 	)
 
-	req := httptest.NewRequest("GET", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Get(w, req)
 
 	if w.Code != http.StatusNotFound {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNotFound, w.Code)
 	}
 
-	if !strings.Contains(w.Body.String(), "key not found") {
-		t.Error("body not equal")
+	shouldContain := "key not found"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 
-	if !strings.Contains(w.Body.String(), "key=test") {
-		t.Error("body not equal")
+	shouldContain = "key=test"
+	if !strings.Contains(w.Body.String(), shouldContain) {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
 
-	// ignore error.
-	_ = kverror.ErrKeyNotFound.DestoryData()
+	_ = kverror.ErrKeyNotFound.DestoryData() // ignore error.
 }
 
-func TestGet(t *testing.T) {
+func TestGetSuccess(t *testing.T) {
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),
@@ -141,16 +154,17 @@ func TestGet(t *testing.T) {
 		}),
 	)
 
-	req := httptest.NewRequest("GET", "/?key=test", nil)
+	req := httptest.NewRequest(http.MethodGet, "/?key=test", nil)
 	w := httptest.NewRecorder()
 
 	handler.Get(w, req)
 
 	if w.Code != http.StatusOK {
-		t.Error("code not equal")
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusOK, w.Code)
 	}
 
-	if w.Body.String() != `{"key":"test","value":"test"}` {
-		t.Error("body not equal")
+	shouldEqual := `{"key":"test","value":"test"}`
+	if w.Body.String() != shouldEqual {
+		t.Errorf("wrong body message, want: %s, got: %s", shouldEqual, w.Body.String())
 	}
 }
