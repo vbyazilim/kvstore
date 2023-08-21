@@ -1,6 +1,15 @@
 package kvstoreservice_test
 
-import "github.com/vbyazilim/kvstore/src/internal/storage"
+import (
+	"errors"
+
+	"github.com/vbyazilim/kvstore/src/internal/storage"
+)
+
+var (
+	errStorageDelete = errors.New("storage delete error")
+	errStorageGet    = errors.New("storage get error")
+)
 
 type mockStorage struct {
 	deleteErr error
@@ -10,11 +19,11 @@ type mockStorage struct {
 	memoryDB  storage.MemoryDB
 }
 
-func (m *mockStorage) Delete(key string) error {
+func (m *mockStorage) Delete(_ string) error {
 	return m.deleteErr
 }
 
-func (m *mockStorage) Get(key string) (interface{}, error) {
+func (m *mockStorage) Get(_ string) (interface{}, error) {
 	return nil, m.getErr
 }
 

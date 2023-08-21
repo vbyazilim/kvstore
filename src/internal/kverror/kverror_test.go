@@ -8,12 +8,13 @@ import (
 	"github.com/vbyazilim/kvstore/src/internal/kverror"
 )
 
-var errWrapped = errors.New("wrapped error")
-var err = kverror.New("some error", true)
+var (
+	errWrapped = errors.New("wrapped error")
+	err        = kverror.New("some error", true)
+	errorData  = "some data"
+)
 
 func TestAddData(t *testing.T) {
-	var errorData = "some data"
-
 	// Add data to error
 	kvError := err.AddData(errorData)
 
@@ -23,7 +24,7 @@ func TestAddData(t *testing.T) {
 	}
 
 	// Destroy data
-	kvError.DestoryData()
+	_ = kvError.DestoryData()
 }
 
 func TestWrap(t *testing.T) {
@@ -37,7 +38,6 @@ func TestWrap(t *testing.T) {
 }
 
 func TestUnwrap(t *testing.T) {
-
 	// Wrap error
 	kvError := err.Wrap(errWrapped)
 
@@ -48,8 +48,6 @@ func TestUnwrap(t *testing.T) {
 }
 
 func TestDestoryData(t *testing.T) {
-	var errorData = "some data"
-
 	// Create a new error
 	err := kverror.New("some error", true)
 
@@ -62,7 +60,7 @@ func TestDestoryData(t *testing.T) {
 	}
 
 	// Destroy data
-	kvError.DestoryData()
+	_ = kvError.DestoryData()
 
 	// Check if data is destroyed
 	if kvError.GetData() != nil {
@@ -71,8 +69,6 @@ func TestDestoryData(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
-	var errorData = "some data"
-
 	// Create a new error
 	err := kverror.New("some error", true)
 
