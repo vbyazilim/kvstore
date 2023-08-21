@@ -1,0 +1,39 @@
+name: Golang Tests
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags-ignore:
+      - '**'
+
+concurrency:
+  group: golang-test
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Run tests
+    runs-on: ubuntu-latest
+    env:
+      GOPRIVATE: github.com/vbyazilim
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+        id: go
+
+      - run: git config --global url.https://${{ github.token }}@github.com/.insteadOf https://github.com/
+
+      - name: Run tests
+        run: LOG_LEVEL="error" go test -p 1 -v -race -failfast -coverprofile=coverage.txt -covermode=atomic ./...
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+            token: ${{ secrets.CODECOV_TOKEN }}
