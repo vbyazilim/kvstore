@@ -16,7 +16,6 @@ var (
 type mockStorage struct {
 	deleteErr error
 	getErr    error
-	setErr    error
 	updateErr error
 	memoryDB  storage.MemoryDB
 }
@@ -33,8 +32,8 @@ func (m *mockStorage) List() storage.MemoryDB {
 	return m.memoryDB
 }
 
-func (m *mockStorage) Set(_ string, _ interface{}) (interface{}, error) {
-	return nil, m.setErr
+func (m *mockStorage) Set(_ string, _ interface{}) interface{} {
+	return nil
 }
 
 func (m *mockStorage) Update(_ string, _ interface{}) (interface{}, error) {
