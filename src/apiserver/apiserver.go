@@ -32,6 +32,7 @@ const (
 
 type apiServer struct {
 	db        storage.MemoryDB
+	logLevel  slog.Level
 	logger    *slog.Logger
 	serverEnv string
 }
@@ -53,16 +54,44 @@ func WithServerEnv(env string) Option {
 	}
 }
 
+// WithLogLevel sets logLevel option.
+func WithLogLevel(level string) Option {
+	return func(s *apiServer) {
+		var logLevel slog.Level
+
+		switch level {
+		case "DEBUG":
+			logLevel = slog.LevelDebug
+		case "WARN":
+			logLevel = slog.LevelWarn
+		case "ERROR":
+			logLevel = slog.LevelError
+		default:
+			logLevel = slog.LevelInfo
+		}
+
+		s.logLevel = logLevel
+	}
+}
+
 // New instantiates new server instance.
 func New(options ...Option) error {
 	apisrvr := &apiServer{
-		db:     storage.MemoryDB(make(map[string]any)),        // default db
-		logger: slog.New(slog.NewJSONHandler(os.Stdout, nil)), // default logger
+		db:       storage.MemoryDB(make(map[string]any)), // default db
+		logLevel: slog.LevelInfo,
 	}
 
 	for _, o := range options {
 		o(apisrvr)
 	}
+
+	// default logging options if logger not present.
+	if apisrvr.logger == nil {
+		logHandlerOpts := &slog.HandlerOptions{Level: apisrvr.logLevel}
+		logHandler := slog.NewJSONHandler(os.Stdout, logHandlerOpts)
+		apisrvr.logger = slog.New(logHandler)
+	}
+	slog.SetDefault(apisrvr.logger)
 
 	if apisrvr.serverEnv == "" {
 		apisrvr.serverEnv = "production" // default server environment

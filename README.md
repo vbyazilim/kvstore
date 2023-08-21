@@ -7,21 +7,32 @@ basic DDD approach (storage/service/http layer logic)
 
 ---
 
-## Installation
-
-@wip
-
----
-
 ## Usage
 
-- GET /healthz/live
-- GET /healthz/live
-- POST /api/v1/set
-- GET /api/v1/get?key={key}
-- PUT /api/v1/update
-- DELETE /api/v1/delete?key={key}
-- GET /api/v1/list
+To run server locally;
+
+```bash
+rake
+```
+
+or `cd` to project root;
+
+```bash
+go run cmd/server/main.go
+```
+
+Endpoints:
+
+```http
+GET    /healthz/live
+GET    /healthz/ready
+
+POST   /api/v1/set
+GET    /api/v1/get?key={key}
+PUT    /api/v1/update
+DELETE /api/v1/delete?key={key}
+GET    /api/v1/list
+```
 
 ---
 
@@ -39,6 +50,7 @@ Environment variables information:
 | Variable Name | Description | Default Value |
 |:--------------|:------------|:------------|
 | `SERVER_ENV` | Server environment information for run-time | `local` |
+| `LOG_LEVEL` | Logging level | `INFO` |
 
 Available tasks:
 
@@ -54,3 +66,15 @@ rake run:server         # run server
 ```
 
 ---
+
+## Docker
+
+```bash
+# build
+rake docker:build
+
+# run
+rake docker:run
+```
+
+
