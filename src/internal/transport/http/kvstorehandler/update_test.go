@@ -2,7 +2,6 @@ package kvstorehandler_test
 
 import (
 	"context"
-	"log/slog"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -104,7 +103,6 @@ func TestUpdateTimeout(t *testing.T) {
 }
 
 func TestUpdateErrUnknown(t *testing.T) {
-	logger := slog.Default()
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
 			updateErr: kverror.ErrUnknown,
@@ -128,8 +126,6 @@ func TestUpdateErrUnknown(t *testing.T) {
 }
 
 func TestUpdateErrKeyExists(t *testing.T) {
-	logger := slog.Default()
-
 	// ignore return no need
 	_ = kverror.ErrKeyNotFound.AddData("key=test")
 
@@ -163,8 +159,6 @@ func TestUpdateErrKeyExists(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	logger := slog.Default()
-
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),

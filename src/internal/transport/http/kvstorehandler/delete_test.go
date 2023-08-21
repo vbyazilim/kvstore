@@ -2,7 +2,7 @@ package kvstorehandler_test
 
 import (
 	"context"
-	"log/slog"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -19,7 +19,7 @@ func TestDeleteInvalidMethod(t *testing.T) {
 
 	handler.Delete(w, req)
 
-	if w.Code != 405 && strings.Contains(w.Body.String(), "method not allowed") {
+	if w.Code != http.StatusMethodNotAllowed && strings.Contains(w.Body.String(), "method not allowed") {
 		t.Error("code not equal")
 	}
 }
@@ -31,7 +31,7 @@ func TestDeleteQueryParamRequired(t *testing.T) {
 
 	handler.Delete(w, req)
 
-	if w.Code != 404 && strings.Contains(w.Body.String(), "key query param required") {
+	if w.Code != http.StatusNotFound && strings.Contains(w.Body.String(), "key query param required") {
 		t.Error("code not equal")
 	}
 }
@@ -43,7 +43,7 @@ func TestDeleteQueryParamKeyNotFound(t *testing.T) {
 
 	handler.Delete(w, req)
 
-	if w.Code != 404 {
+	if w.Code != http.StatusNotFound {
 		t.Error("code not equal")
 	}
 
@@ -65,7 +65,7 @@ func TestDeleteTimeout(t *testing.T) {
 
 	handler.Delete(w, req)
 
-	if w.Code != 500 {
+	if w.Code != http.StatusInternalServerError {
 		t.Error("code not equal")
 	}
 
@@ -75,7 +75,6 @@ func TestDeleteTimeout(t *testing.T) {
 }
 
 func TestDeleteErrUnknown(t *testing.T) {
-	logger := slog.Default()
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
 			deleteErr: kverror.ErrUnknown,
@@ -88,7 +87,7 @@ func TestDeleteErrUnknown(t *testing.T) {
 
 	handler.Delete(w, req)
 
-	if w.Code != 500 {
+	if w.Code != http.StatusInternalServerError {
 		t.Error("code not equal")
 	}
 
@@ -98,8 +97,6 @@ func TestDeleteErrUnknown(t *testing.T) {
 }
 
 func TestDeleteErrKeyNotFound(t *testing.T) {
-	logger := slog.Default()
-
 	// ignore error.
 	_ = kverror.ErrKeyNotFound.AddData("key=test")
 
@@ -115,7 +112,7 @@ func TestDeleteErrKeyNotFound(t *testing.T) {
 
 	handler.Delete(w, req)
 
-	if w.Code != 404 {
+	if w.Code != http.StatusNotFound {
 		t.Error("code not equal")
 	}
 
@@ -132,8 +129,6 @@ func TestDeleteErrKeyNotFound(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	logger := slog.Default()
-
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),
@@ -144,7 +139,7 @@ func TestDelete(t *testing.T) {
 
 	handler.Delete(w, req)
 
-	if w.Code != 204 {
+	if w.Code != http.StatusNoContent {
 		t.Error("code not equal")
 	}
 

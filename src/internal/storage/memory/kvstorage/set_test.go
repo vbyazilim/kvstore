@@ -3,13 +3,12 @@ package kvstorage_test
 import (
 	"testing"
 
-	"github.com/vbyazilim/kvstore/src/internal/storage"
 	"github.com/vbyazilim/kvstore/src/internal/storage/memory/kvstorage"
 )
 
 func TestSet(t *testing.T) {
 	key := "key"
-	memoryStorage := storage.MemoryDB(map[string]interface{}{})
+	memoryStorage := kvstorage.MemoryDB(map[string]interface{}{})
 	storage := kvstorage.New(
 		kvstorage.WithMemoryDB(memoryStorage),
 	)

@@ -2,9 +2,13 @@ package kvstorehandler_test
 
 import (
 	"context"
+	"log/slog"
+	"os"
 
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 )
+
+var logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 type mockService struct {
 	deleteErr      error

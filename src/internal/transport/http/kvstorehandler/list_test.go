@@ -2,7 +2,6 @@ package kvstorehandler_test
 
 import (
 	"context"
-	"log/slog"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -48,7 +47,6 @@ func TestListTimeout(t *testing.T) {
 }
 
 func TestListErrUnknown(t *testing.T) {
-	logger := slog.Default()
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
 			listErr: kverror.ErrUnknown,
@@ -71,8 +69,6 @@ func TestListErrUnknown(t *testing.T) {
 }
 
 func TestList(t *testing.T) {
-	logger := slog.Default()
-
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),

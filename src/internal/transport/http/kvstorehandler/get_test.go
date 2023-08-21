@@ -2,7 +2,7 @@ package kvstorehandler_test
 
 import (
 	"context"
-	"log/slog"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -20,7 +20,7 @@ func TestGetInvalidMethod(t *testing.T) {
 
 	handler.Get(w, req)
 
-	if w.Code != 405 && strings.Contains(w.Body.String(), "method not allowed") {
+	if w.Code != http.StatusMethodNotAllowed && strings.Contains(w.Body.String(), "method not allowed") {
 		t.Error("code not equal")
 	}
 }
@@ -32,7 +32,7 @@ func TestGetQueryParamRequired(t *testing.T) {
 
 	handler.Get(w, req)
 
-	if w.Code != 404 && strings.Contains(w.Body.String(), "key query param required") {
+	if w.Code != http.StatusNotFound && strings.Contains(w.Body.String(), "key query param required") {
 		t.Error("code not equal")
 	}
 }
@@ -44,7 +44,7 @@ func TestGetQueryParamKeyNotFound(t *testing.T) {
 
 	handler.Get(w, req)
 
-	if w.Code != 404 {
+	if w.Code != http.StatusNotFound {
 		t.Error("code not equal")
 	}
 
@@ -66,7 +66,7 @@ func TestGetTimeout(t *testing.T) {
 
 	handler.Get(w, req)
 
-	if w.Code != 500 {
+	if w.Code != http.StatusInternalServerError {
 		t.Error("code not equal")
 	}
 
@@ -76,7 +76,6 @@ func TestGetTimeout(t *testing.T) {
 }
 
 func TestGetErrUnknown(t *testing.T) {
-	logger := slog.Default()
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
 			getErr: kverror.ErrUnknown,
@@ -89,7 +88,7 @@ func TestGetErrUnknown(t *testing.T) {
 
 	handler.Get(w, req)
 
-	if w.Code != 500 {
+	if w.Code != http.StatusInternalServerError {
 		t.Error("code not equal")
 	}
 
@@ -99,8 +98,6 @@ func TestGetErrUnknown(t *testing.T) {
 }
 
 func TestGetErrKeyNotFound(t *testing.T) {
-	logger := slog.Default()
-
 	// ignore error.
 	_ = kverror.ErrKeyNotFound.AddData("key=test")
 
@@ -116,7 +113,7 @@ func TestGetErrKeyNotFound(t *testing.T) {
 
 	handler.Get(w, req)
 
-	if w.Code != 404 {
+	if w.Code != http.StatusNotFound {
 		t.Error("code not equal")
 	}
 
@@ -133,8 +130,6 @@ func TestGetErrKeyNotFound(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	logger := slog.Default()
-
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),
@@ -151,7 +146,7 @@ func TestGet(t *testing.T) {
 
 	handler.Get(w, req)
 
-	if w.Code != 200 {
+	if w.Code != http.StatusOK {
 		t.Error("code not equal")
 	}
 
