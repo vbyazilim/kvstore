@@ -9,6 +9,7 @@ var (
 var (
 	ErrKeyExists   = New("key exist", true)
 	ErrKeyNotFound = New("key not found", false)
+	ErrUnknown     = New("unknown error", true)
 )
 
 // KVError defines custom error behaviours.
