@@ -16,11 +16,12 @@ var (
 )
 
 type mockService struct {
-	deleteErr error
-	getErr    error
-	listErr   error
-	setErr    error
-	updateErr error
+	deleteErr   error
+	getErr      error
+	getResponse *kvstoreservice.ItemResponse
+	listErr     error
+	setErr      error
+	updateErr   error
 }
 
 func (m *mockService) Delete(_ context.Context, _ string) error {
@@ -28,7 +29,7 @@ func (m *mockService) Delete(_ context.Context, _ string) error {
 }
 
 func (m *mockService) Get(_ context.Context, _ string) (*kvstoreservice.ItemResponse, error) {
-	return nil, m.getErr
+	return m.getResponse, m.getErr
 }
 
 func (m *mockService) List(_ context.Context) (*kvstoreservice.ListResponse, error) {
