@@ -71,7 +71,7 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.CancelTimeout)
 	defer cancel()
 
-	if _, err = h.service.Get(ctx, handlerRequest.Key); err == nil {
+	if _, err = h.service.Get(ctx, handlerRequest.Key); err != nil {
 		h.JSON(
 			w,
 			http.StatusConflict,

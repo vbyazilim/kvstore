@@ -2,7 +2,6 @@ package kvstorehandler_test
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"net/http/httptest"
 	"strings"
@@ -93,8 +92,6 @@ func TestDeleteErrUnknown(t *testing.T) {
 		t.Error("code not equal")
 	}
 
-	fmt.Print("body: ", w.Body.String(), "\n")
-
 	if !strings.Contains(w.Body.String(), "unknown error") {
 		t.Error("body not equal")
 	}
@@ -102,7 +99,9 @@ func TestDeleteErrUnknown(t *testing.T) {
 
 func TestDeleteErrKeyNotFound(t *testing.T) {
 	logger := slog.Default()
-	kverror.ErrKeyNotFound.AddData("key=test")
+
+	// ignore error.
+	_ = kverror.ErrKeyNotFound.AddData("key=test")
 
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
@@ -128,7 +127,8 @@ func TestDeleteErrKeyNotFound(t *testing.T) {
 		t.Error("body not equal")
 	}
 
-	kverror.ErrKeyNotFound.DestoryData()
+	// ignore error.
+	_ = kverror.ErrKeyNotFound.DestoryData()
 }
 
 func TestDelete(t *testing.T) {

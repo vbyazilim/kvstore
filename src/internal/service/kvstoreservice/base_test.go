@@ -9,7 +9,6 @@ import (
 var (
 	errStorageDelete = errors.New("storage delete error")
 	errStorageGet    = errors.New("storage get error")
-	errStorageSet    = errors.New("storage set error")
 	errStorageUpdate = errors.New("storage update error")
 )
 

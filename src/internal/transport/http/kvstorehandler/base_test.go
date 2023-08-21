@@ -2,26 +2,20 @@ package kvstorehandler_test
 
 import (
 	"context"
-	"errors"
 
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 )
 
-var (
-	errServiceDelete = errors.New("service.Delete")
-	errServiceGet    = errors.New("service.Get")
-	errServiceList   = errors.New("service.List")
-	errServiceSet    = errors.New("service.Set")
-	errServiceUpdate = errors.New("service.Update")
-)
-
 type mockService struct {
-	deleteErr   error
-	getErr      error
-	getResponse *kvstoreservice.ItemResponse
-	listErr     error
-	setErr      error
-	updateErr   error
+	deleteErr      error
+	getErr         error
+	getResponse    *kvstoreservice.ItemResponse
+	listErr        error
+	listResponse   *kvstoreservice.ListResponse
+	setErr         error
+	setResponse    *kvstoreservice.ItemResponse
+	updateErr      error
+	updateResponse *kvstoreservice.ItemResponse
 }
 
 func (m *mockService) Delete(_ context.Context, _ string) error {
@@ -33,17 +27,13 @@ func (m *mockService) Get(_ context.Context, _ string) (*kvstoreservice.ItemResp
 }
 
 func (m *mockService) List(_ context.Context) (*kvstoreservice.ListResponse, error) {
-	return nil, m.listErr
+	return m.listResponse, m.listErr
 }
 
 func (m *mockService) Set(_ context.Context, _ *kvstoreservice.SetRequest) (*kvstoreservice.ItemResponse, error) {
-	return nil, m.setErr
+	return m.setResponse, m.setErr
 }
 
 func (m *mockService) Update(_ context.Context, _ *kvstoreservice.UpdateRequest) (*kvstoreservice.ItemResponse, error) {
-	return nil, m.updateErr
-}
-
-type mockLogger struct {
-	logErr error
+	return m.updateResponse, m.updateErr
 }
