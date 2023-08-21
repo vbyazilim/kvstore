@@ -16,7 +16,7 @@ func TestDeleteEmpty(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	key := "key"
-	memoryStorage := map[string]interface{}{
+	memoryStorage := map[string]any{
 		key: "value",
 	}
 	storage := kvstorage.New(

@@ -23,7 +23,7 @@ func (m *mockStorage) Delete(_ string) error {
 	return m.deleteErr
 }
 
-func (m *mockStorage) Get(_ string) (interface{}, error) {
+func (m *mockStorage) Get(_ string) (any, error) {
 	return nil, m.getErr
 }
 
@@ -31,10 +31,10 @@ func (m *mockStorage) List() kvstorage.MemoryDB {
 	return m.memoryDB
 }
 
-func (m *mockStorage) Set(_ string, _ interface{}) interface{} {
+func (m *mockStorage) Set(_ string, _ any) any {
 	return nil
 }
 
-func (m *mockStorage) Update(_ string, _ interface{}) (interface{}, error) {
+func (m *mockStorage) Update(_ string, _ any) (any, error) {
 	return nil, m.updateErr
 }

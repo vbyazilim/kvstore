@@ -16,8 +16,7 @@ func TestUpdateWithCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	_, err := kvsStoreService.Update(ctx, nil)
-	if !errors.Is(err, ctx.Err()) {
+	if _, err := kvsStoreService.Update(ctx, nil); !errors.Is(err, ctx.Err()) {
 		t.Error("error not occurred")
 	}
 }
@@ -32,15 +31,17 @@ func TestUpdateWithStorageError(t *testing.T) {
 		Key:   "key",
 		Value: "value",
 	}
-	_, err := kvsStoreService.Update(context.Background(), &updateRequest)
-	if !strings.Contains(err.Error(), "kvstoreservice.Set storage.Update") {
+	if _, err := kvsStoreService.Update(context.Background(), &updateRequest); !strings.Contains(
+		err.Error(),
+		"kvstoreservice.Set storage.Update",
+	) {
 		t.Error("error not occurred")
 	}
 }
 
 func TestUpdate(t *testing.T) {
 	mockStorage := &mockStorage{
-		memoryDB: map[string]interface{}{
+		memoryDB: map[string]any{
 			"key": "value",
 		},
 	}
@@ -50,8 +51,7 @@ func TestUpdate(t *testing.T) {
 		Key:   "key",
 		Value: "value",
 	}
-	_, err := kvsStoreService.Update(context.Background(), &updateRequest)
-	if err != nil {
+	if _, err := kvsStoreService.Update(context.Background(), &updateRequest); err != nil {
 		t.Error("error occurred")
 	}
 }

@@ -9,7 +9,7 @@ import (
 
 func TestList(t *testing.T) {
 	key := "key"
-	memoryStorage := kvstorage.MemoryDB(map[string]interface{}{
+	memoryStorage := kvstorage.MemoryDB(map[string]any{
 		key: "value",
 	})
 	storage := kvstorage.New(

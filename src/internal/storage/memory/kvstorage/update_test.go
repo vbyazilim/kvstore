@@ -16,7 +16,7 @@ func TestUpdateEmpty(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	key := "key"
-	memoryStorage := map[string]interface{}{
+	memoryStorage := map[string]any{
 		key: "value",
 	}
 	storage := kvstorage.New(

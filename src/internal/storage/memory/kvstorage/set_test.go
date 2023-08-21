@@ -8,7 +8,7 @@ import (
 
 func TestSet(t *testing.T) {
 	key := "key"
-	memoryStorage := kvstorage.MemoryDB(map[string]interface{}{})
+	memoryStorage := kvstorage.MemoryDB(map[string]any{})
 	storage := kvstorage.New(
 		kvstorage.WithMemoryDB(memoryStorage),
 	)

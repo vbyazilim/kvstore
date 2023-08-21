@@ -15,15 +15,14 @@ func TestSetWithCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	_, err := kvsStoreService.Set(ctx, nil)
-	if !errors.Is(err, ctx.Err()) {
+	if _, err := kvsStoreService.Set(ctx, nil); !errors.Is(err, ctx.Err()) {
 		t.Error("error not occurred")
 	}
 }
 
 func TestSet(t *testing.T) {
 	mockStorage := &mockStorage{
-		memoryDB: map[string]interface{}{
+		memoryDB: map[string]any{
 			"key": "value",
 		},
 	}
@@ -33,8 +32,7 @@ func TestSet(t *testing.T) {
 		Key:   "key",
 		Value: "value",
 	}
-	_, err := kvsStoreService.Set(context.Background(), &setRequest)
-	if err != nil {
+	if _, err := kvsStoreService.Set(context.Background(), &setRequest); err != nil {
 		t.Error("error occurred")
 	}
 }

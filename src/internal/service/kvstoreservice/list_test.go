@@ -15,22 +15,20 @@ func TestListWithCancel(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 
-	_, err := kvsStoreService.List(ctx)
-	if !errors.Is(err, ctx.Err()) {
+	if _, err := kvsStoreService.List(ctx); !errors.Is(err, ctx.Err()) {
 		t.Error("error not occurred")
 	}
 }
 
 func TestList(t *testing.T) {
 	mockStorage := &mockStorage{
-		memoryDB: map[string]interface{}{
+		memoryDB: map[string]any{
 			"key": "value",
 		},
 	}
 	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
 
-	_, err := kvsStoreService.List(context.Background())
-	if err != nil {
+	if _, err := kvsStoreService.List(context.Background()); err != nil {
 		t.Error("error occurred")
 	}
 }

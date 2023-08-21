@@ -16,7 +16,7 @@ func TestGetEmpty(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	key := "key"
-	memoryStorage := map[string]interface{}{
+	memoryStorage := map[string]any{
 		key: "value",
 	}
 	storage := kvstorage.New(
