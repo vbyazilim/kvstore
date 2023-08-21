@@ -80,3 +80,12 @@ task :release, [:revision] => [:is_repo_clean] do |_, args|
   args.with_defaults(revision: 'patch')
   Rake::Task['bump'].invoke(args.revision)
 end
+
+namespace :test do
+  desc "run all tests"
+  task :run_all do
+    system %{
+      LOG_LEVEL="error" go test -race -p 1 -v -race -failfast ./...
+    }
+  end
+end
