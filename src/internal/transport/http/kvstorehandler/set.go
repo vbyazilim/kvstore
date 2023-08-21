@@ -71,7 +71,44 @@ func (h *kvstoreHandler) Set(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), h.CancelTimeout)
 	defer cancel()
 
-	if _, err = h.service.Get(ctx, handlerRequest.Key); err != nil {
+	existingItem, err := h.service.Get(ctx, handlerRequest.Key)
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			h.JSON(
+				w,
+				http.StatusGatewayTimeout,
+				map[string]string{"error": err.Error()},
+			)
+			return
+		}
+
+		var kvErr *kverror.Error
+		if errors.As(err, &kvErr) {
+			clientMessage := kvErr.Message
+			if kvErr.Data != nil {
+				data, ok := kvErr.Data.(string)
+				if ok {
+					clientMessage = clientMessage + ", " + data
+				}
+			}
+
+			if kvErr.Loggable {
+				h.Logger.Error("kvstorehandler Set service.Get", "err", clientMessage)
+			}
+
+			if kvErr != kverror.ErrKeyNotFound {
+				h.JSON(
+					w,
+					http.StatusBadRequest,
+					map[string]string{"error": clientMessage},
+				)
+				return
+			}
+		}
+	}
+
+	// this should be nil. means, key does not exist
+	if existingItem != nil {
 		h.JSON(
 			w,
 			http.StatusConflict,

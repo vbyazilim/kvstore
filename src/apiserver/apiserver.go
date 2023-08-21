@@ -138,15 +138,15 @@ func New(options ...Option) error {
 		_, _ = w.Write(j)
 	})
 
-	mux.HandleFunc(apiV1Prefix+"/set", kvStoreHandler.Set)
-	mux.HandleFunc(apiV1Prefix+"/get", kvStoreHandler.Get)
-	mux.HandleFunc(apiV1Prefix+"/update", kvStoreHandler.Update)
-	mux.HandleFunc(apiV1Prefix+"/delete", kvStoreHandler.Delete)
-	mux.HandleFunc(apiV1Prefix+"/list", kvStoreHandler.List)
+	mux.HandleFunc(apiV1Prefix+"/set/", kvStoreHandler.Set)
+	mux.HandleFunc(apiV1Prefix+"/get/", kvStoreHandler.Get)
+	mux.HandleFunc(apiV1Prefix+"/update/", kvStoreHandler.Update)
+	mux.HandleFunc(apiV1Prefix+"/delete/", kvStoreHandler.Delete)
+	mux.HandleFunc(apiV1Prefix+"/list/", kvStoreHandler.List)
 
 	api := &http.Server{
 		Addr:         ":8000",
-		Handler:      mux,
+		Handler:      appendSlashMiddleware(httpLoggingMiddleware(logger, mux)),
 		ReadTimeout:  ServerReadTimeout,
 		WriteTimeout: ServerWriteTimeout,
 		IdleTimeout:  ServerIdleTimeout,

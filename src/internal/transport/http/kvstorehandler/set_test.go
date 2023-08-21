@@ -99,11 +99,11 @@ func TestSetTimeout(t *testing.T) {
 
 	handler.Set(w, req)
 
-	if w.Code != http.StatusConflict {
-		t.Errorf("wrong status code, want: %d, got: %d", http.StatusConflict, w.Code)
+	if w.Code != http.StatusGatewayTimeout {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusGatewayTimeout, w.Code)
 	}
 
-	shouldContain := "can not set, 'test' already exists"
+	shouldContain := "context deadline exceeded"
 	if !strings.Contains(w.Body.String(), shouldContain) {
 		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
 	}
@@ -171,10 +171,6 @@ func TestSetSuccess(t *testing.T) {
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),
 		kvstorehandler.WithService(&mockService{
-			getResponse: &kvstoreservice.ItemResponse{
-				Key:   "test",
-				Value: "test",
-			},
 			setResponse: &kvstoreservice.ItemResponse{
 				Key:   "test",
 				Value: "test",

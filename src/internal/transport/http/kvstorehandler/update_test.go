@@ -99,8 +99,8 @@ func TestUpdateTimeout(t *testing.T) {
 
 	handler.Update(w, req)
 
-	if w.Code != http.StatusInternalServerError {
-		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
+	if w.Code != http.StatusGatewayTimeout {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusGatewayTimeout, w.Code)
 	}
 
 	shouldContain := "context deadline exceeded"

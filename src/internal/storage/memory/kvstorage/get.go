@@ -12,7 +12,7 @@ func (ms *memoryStorage) Get(key string) (any, error) {
 
 	value, ok := ms.db[key]
 	if !ok {
-		return nil, fmt.Errorf("%w", kverror.ErrKeyNotFound.AddData("'"+key+"' does not exists"))
+		return nil, fmt.Errorf("%w", kverror.ErrKeyNotFound.AddData("'"+key+"' does not exist"))
 	}
 	return value, nil
 }

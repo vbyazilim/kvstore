@@ -43,6 +43,15 @@ func (h *kvstoreHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	if err := h.service.Delete(ctx, key); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			h.JSON(
+				w,
+				http.StatusGatewayTimeout,
+				map[string]string{"error": err.Error()},
+			)
+			return
+		}
+
 		var kvErr *kverror.Error
 
 		if errors.As(err, &kvErr) {
