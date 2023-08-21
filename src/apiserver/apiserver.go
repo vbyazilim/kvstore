@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
-	"github.com/vbyazilim/kvstore/src/internal/storage"
 	"github.com/vbyazilim/kvstore/src/internal/storage/memory/kvstorage"
 	"github.com/vbyazilim/kvstore/src/internal/transport/http/kvstorehandler"
 	"github.com/vbyazilim/kvstore/src/releaseinfo"
@@ -31,7 +30,7 @@ const (
 )
 
 type apiServer struct {
-	db        storage.MemoryDB
+	db        kvstorage.MemoryDB
 	logLevel  slog.Level
 	logger    *slog.Logger
 	serverEnv string
@@ -77,7 +76,7 @@ func WithLogLevel(level string) Option {
 // New instantiates new server instance.
 func New(options ...Option) error {
 	apisrvr := &apiServer{
-		db:       storage.MemoryDB(make(map[string]any)), // default db
+		db:       kvstorage.MemoryDB(make(map[string]any)), // default db
 		logLevel: slog.LevelInfo,
 	}
 

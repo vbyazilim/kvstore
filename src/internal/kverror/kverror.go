@@ -9,6 +9,7 @@ var (
 var (
 	ErrKeyExists   = New("key exist", true)
 	ErrKeyNotFound = New("key not found", false)
+	ErrUnknown     = New("unknown error", true)
 )
 
 // KVError defines custom error behaviours.
@@ -16,6 +17,7 @@ type KVError interface {
 	Wrap(err error) KVError
 	Unwrap() error
 	AddData(any) KVError
+	GetData() any
 	DestoryData() KVError
 	Error() string
 }
@@ -32,6 +34,11 @@ type Error struct {
 func (e *Error) AddData(data any) KVError {
 	e.Data = data
 	return e
+}
+
+// GetData returns added data.
+func (e *Error) GetData() any {
+	return e.Data
 }
 
 // Unwrap unwraps error.

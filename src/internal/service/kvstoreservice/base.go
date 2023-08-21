@@ -3,7 +3,7 @@ package kvstoreservice
 import (
 	"context"
 
-	"github.com/vbyazilim/kvstore/src/internal/storage"
+	"github.com/vbyazilim/kvstore/src/internal/storage/memory/kvstorage"
 )
 
 var _ KVStoreService = (*kvStoreService)(nil) // compile time proof
@@ -18,14 +18,14 @@ type KVStoreService interface {
 }
 
 type kvStoreService struct {
-	storage storage.Storer
+	storage kvstorage.Storer
 }
 
 // ServiceOption represents service option type.
 type ServiceOption func(*kvStoreService)
 
 // WithStorage sets storage option.
-func WithStorage(strg storage.Storer) ServiceOption {
+func WithStorage(strg kvstorage.Storer) ServiceOption {
 	return func(s *kvStoreService) {
 		s.storage = strg
 	}
