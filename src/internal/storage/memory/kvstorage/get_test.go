@@ -3,7 +3,6 @@ package kvstorage_test
 import (
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/vbyazilim/kvstore/src/internal/storage/memory/kvstorage"
 )
 
@@ -16,7 +15,7 @@ func TestGetEmpty(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	key := uuid.New().String()
+	key := "key"
 	memoryStorage := map[string]interface{}{
 		key: "value",
 	}

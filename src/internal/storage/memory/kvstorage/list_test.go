@@ -4,13 +4,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/google/uuid"
 	"github.com/vbyazilim/kvstore/src/internal/storage"
 	"github.com/vbyazilim/kvstore/src/internal/storage/memory/kvstorage"
 )
 
 func TestList(t *testing.T) {
-	key := uuid.New().String()
+	key := "key"
 	memoryStorage := storage.MemoryDB(map[string]interface{}{
 		key: "value",
 	})
