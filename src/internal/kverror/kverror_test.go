@@ -2,89 +2,101 @@ package kverror_test
 
 import (
 	"errors"
-	"strings"
 	"testing"
 
 	"github.com/vbyazilim/kvstore/src/internal/kverror"
 )
 
-var (
-	errWrapped = errors.New("wrapped error")
-	err        = kverror.New("some error", true)
-	errorData  = "some data"
-)
+func TestError(t *testing.T) {
+	err := kverror.New("some error", true)
+	var kvErr *kverror.Error
 
-func TestAddData(t *testing.T) {
-	// Add data to error
-	kvError := err.AddData(errorData)
-
-	// Check if data is added
-	if !strings.Contains(kvError.Error(), errorData) == false {
-		t.Error("data not added")
+	if !errors.As(err, &kvErr) {
+		t.Errorf("error does not match the target type, want: %T, got: %v", kvErr, err)
 	}
 
-	// Destroy data
-	_ = kvError.DestoryData()
+	shouldEqual := "some error"
+	if kvErr.Message != shouldEqual {
+		t.Errorf("error message does not match, want: %s, got: %s", shouldEqual, kvErr.Message)
+	}
+
+	shouldLoggable := true
+	if kvErr.Loggable != shouldLoggable {
+		t.Errorf("error should be loggable, want: %t, got: %t", shouldLoggable, kvErr.Loggable)
+	}
 }
 
 func TestWrap(t *testing.T) {
-	// Wrap error
-	kvError := err.Wrap(errWrapped)
+	err := kverror.New("some error", false)
+	wrappedErr := err.Wrap(errors.New("inner")) // nolint
 
-	// Check if error is wrapped
-	if kvError.Error() != "wrapped error, some error" {
-		t.Error("error not wrapped")
+	var kvErr *kverror.Error
+
+	if !errors.As(wrappedErr, &kvErr) {
+		t.Errorf("error does not match the target type, want: %T, got: %v", kvErr, err)
+	}
+
+	if kvErr.Err == nil {
+		t.Errorf("wrapped error can not be nil, want: %v, got: nil", kvErr.Err)
+	}
+
+	shouldEqual := "inner, some error"
+	if err.Error() != shouldEqual {
+		t.Errorf("wrapped error does not match, want: %s, got: %s", shouldEqual, err.Error())
 	}
 }
 
 func TestUnwrap(t *testing.T) {
-	// Wrap error
-	kvError := err.Wrap(errWrapped)
+	err := kverror.New("some error", false)
+	wrappedErr := err.Wrap(errors.New("inner")) // nolint
 
-	// Check if error is wrapped
-	if !errors.Is(kvError.Unwrap(), errWrapped) {
-		t.Error("error not unwrapped")
+	var kvErr *kverror.Error
+
+	if !errors.As(wrappedErr, &kvErr) {
+		t.Errorf("error does not match the target type, want: %T, got: %v", kvErr, err)
+	}
+
+	shouldEqual := "inner"
+	unwrappedErr := kvErr.Unwrap()
+	if unwrappedErr.Error() != shouldEqual {
+		t.Errorf("unwrapped error does not match, want: %s, got: %s", shouldEqual, unwrappedErr.Error())
 	}
 }
 
-func TestDestoryData(t *testing.T) {
-	// Create a new error
-	err := kverror.New("some error", true)
+func TestAddDataDestroyData(t *testing.T) {
+	err := kverror.New("some error", false).AddData("hello")
 
-	// Add data to error
-	kvError := err.AddData(errorData)
+	var kvErr *kverror.Error
 
-	// Check if data is added
-	if kvError.GetData() != errorData {
-		t.Error("data not added")
+	if !errors.As(err, &kvErr) {
+		t.Errorf("error does not match the target type, want: %T, got: %v", kvErr, err)
 	}
 
-	// Destroy data
-	_ = kvError.DestoryData()
-
-	// Check if data is destroyed
-	if kvError.GetData() != nil {
-		t.Error("data not destroyed")
-	}
-}
-
-func TestError(t *testing.T) {
-	// Create a new error
-	err := kverror.New("some error", true)
-
-	// Add data to error
-	kvError := err.AddData(errorData)
-
-	// Check if error message is correct
-	if kvError.GetData() != errorData {
-		t.Error("error message is not correct")
+	if kvErr.Data == nil {
+		t.Errorf("data should not be nil, want: %v, got: nil", kvErr.Data)
 	}
 
-	// Wrap error
-	kvError = kvError.Wrap(errWrapped)
+	shouldEqual := "hello"
+	data, ok := kvErr.Data.(string)
+	if !ok {
+		t.Error("data should be assertable to string")
+	}
 
-	// Check if error message is correct
-	if kvError.Error() != "wrapped error, some error" {
-		t.Error("error message is not correct")
+	if data != shouldEqual {
+		t.Errorf("data does not match, want: %s, got: %s", shouldEqual, data)
+	}
+
+	shouldEqual = "some error"
+	if err.Error() != shouldEqual {
+		t.Errorf("error does not match, want: %s, got: %s", shouldEqual, err.Error())
+	}
+
+	err = err.DestoryData()
+	if !errors.As(err, &kvErr) {
+		t.Errorf("error does not match the target type, want: %T, got: %v", kvErr, err)
+	}
+
+	if kvErr.Data != nil {
+		t.Errorf("data should be nil, want: nil, got: %v", kvErr.Data)
 	}
 }
