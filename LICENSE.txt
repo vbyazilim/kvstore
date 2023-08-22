@@ -1,13 +1,13 @@
-Eğitim Amaçlı Kullanım Lisansı
+Educational Use License
 
-Bu projeyi sadece eğitim ve öğrenim amaçları için kullanabilirsiniz. Bu eserin
-tamamının veya parçalarının dağıtılması, paylaşılması veya ticari amaçlarla
-kullanılması kesinlikle yasaktır.
+You are allowed to use this project solely for educational and learning
+purposes. Distribution, sharing, or any commercial use of this work, either in
+its entirety or parts, is strictly prohibited.
 
-Bu lisans, yalnızca eğitim ve öğrenim amaçları için kullanım hakkı tanır ve
-diğer her türlü kullanımı yasaklar.
+This license grants usage rights exclusively for educational and learning
+purposes and prohibits any other forms of use.
 
-Lisansı ihlal edenler hukuki yaptırımla karşı karşıya kalabilirler.
+Violators of the license may face legal consequences.
 
-Lisansın tam metni ve ayrıntıları için hello@vbyazilim.com ile iletişime
-geçiniz.
+For the full text and details of the license, please contact the author of the
+license (hello@vbyazilim.com).
