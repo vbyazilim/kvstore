@@ -6,6 +6,10 @@ task :has_bumpversion do
   Rake::Task['command_exists'].invoke('bumpversion')
 end
 
+task :is_repo_clean do
+  abort 'please commit your changes first!' unless `git status -s | wc -l`.strip.to_i.zero?
+end
+
 AVAILABLE_REVISIONS = %w[major minor patch].freeze
 task :bump, [:revision] => [:has_bumpversion] do |_, args|
   args.with_defaults(revision: 'patch')
