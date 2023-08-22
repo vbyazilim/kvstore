@@ -1,8 +1,8 @@
 ![Version](https://img.shields.io/badge/version-0.0.0-orange.svg)
 [![Golang Tests](https://github.com/vbyazilim/kvstore/actions/workflows/go-test.yml/badge.svg)](https://github.com/vbyazilim/kvstore/actions/workflows/go-test.yml)
 [![Golang CI Lint](https://github.com/vbyazilim/kvstore/actions/workflows/go-lint.yml/badge.svg)](https://github.com/vbyazilim/kvstore/actions/workflows/go-lint.yml)
+[![codecov](https://codecov.io/gh/vbyazilim/kvstore/graph/badge.svg?token=514LHYMOA4)](https://codecov.io/gh/vbyazilim/kvstore)
 ![Powered by Rake](https://img.shields.io/badge/powered_by-rake-blue?logo=ruby)
-
 
 # KVStore
 
