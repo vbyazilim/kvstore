@@ -1,0 +1,13 @@
+Educational Use License
+
+You are allowed to use this project solely for educational and learning
+purposes. Distribution, sharing, or any commercial use of this work, either in
+its entirety or parts, is strictly prohibited.
+
+This license grants usage rights exclusively for educational and learning
+purposes and prohibits any other forms of use.
+
+Violators of the license may face legal consequences.
+
+For the full text and details of the license, please contact the author of the
+license (hello@vbyazilim.com).
