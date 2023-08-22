@@ -38,6 +38,8 @@ DELETE /api/v1/delete?key={key}
 GET    /api/v1/list
 ```
 
+Also, you can use [postman](postman/KVStore.postman_collection.json) collection.
+
 ---
 
 ## Development
@@ -46,6 +48,7 @@ GET    /api/v1/list
 
 - `go1.21.0`
 - `bumpversion`
+- `pre-commit`
 
 You can create `.env` file inside of the project root for environment variables
 
@@ -55,6 +58,15 @@ Environment variables information:
 |:--------------|:------------|:------------|
 | `SERVER_ENV` | Server environment information for run-time | `local` |
 | `LOG_LEVEL` | Logging level | `INFO` |
+
+### Install `pre-commit`
+
+https://pre-commit.com/
+
+```bash
+$ cd /path/to/kvstore
+$ pre-commit install       # do only once!
+```
 
 Available tasks:
 
@@ -88,4 +100,5 @@ rake docker:build
 rake docker:run
 ```
 
+---
 

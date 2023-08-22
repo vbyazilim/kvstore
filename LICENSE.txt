@@ -1,0 +1,13 @@
+Eğitim Amaçlı Kullanım Lisansı
+
+Bu projeyi sadece eğitim ve öğrenim amaçları için kullanabilirsiniz. Bu eserin
+tamamının veya parçalarının dağıtılması, paylaşılması veya ticari amaçlarla
+kullanılması kesinlikle yasaktır.
+
+Bu lisans, yalnızca eğitim ve öğrenim amaçları için kullanım hakkı tanır ve
+diğer her türlü kullanımı yasaklar.
+
+Lisansı ihlal edenler hukuki yaptırımla karşı karşıya kalabilirler.
+
+Lisansın tam metni ve ayrıntıları için hello@vbyazilim.com ile iletişime
+geçiniz.

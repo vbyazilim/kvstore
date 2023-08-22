@@ -1,0 +1,16 @@
+repos:
+- repo: https://github.com/dnephin/pre-commit-golang
+  rev: v0.5.1
+  hooks:
+    - id: golangci-lint
+    - id: go-unit-tests
+    - id: go-mod-tidy
+- repo: https://github.com/Yelp/detect-secrets
+  rev: v1.4.0
+  hooks:
+    - id: detect-secrets
+      files: .*
+      exclude: |
+        (?x)^(
+          postman/KVStore.postman_collection.json
+        )$
