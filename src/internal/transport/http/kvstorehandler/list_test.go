@@ -56,7 +56,7 @@ func TestListTimeout(t *testing.T) {
 func TestListErrUnknown(t *testing.T) {
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
-			listErr: kverror.ErrUnknown,
+			listErr: kverror.ErrUnknown.AddData("fake error"),
 		}),
 		kvstorehandler.WithLogger(logger),
 	)
@@ -73,6 +73,25 @@ func TestListErrUnknown(t *testing.T) {
 	shouldContain := "unknown error"
 	if !strings.Contains(w.Body.String(), shouldContain) {
 		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
+	}
+}
+
+func TestEmptyList(t *testing.T) {
+	handler := kvstorehandler.New(
+		kvstorehandler.WithService(&mockService{}),
+		kvstorehandler.WithLogger(logger),
+		kvstorehandler.WithService(&mockService{
+			listResponse: &kvstoreservice.ListResponse{},
+		}),
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	w := httptest.NewRecorder()
+
+	handler.List(w, req)
+
+	if w.Code != http.StatusNotFound {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusNotFound, w.Code)
 	}
 }
 

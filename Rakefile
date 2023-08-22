@@ -92,4 +92,14 @@ namespace :test do
       LOG_LEVEL="error" go test -race -p 1 -v -race -failfast ./...
     }
   end
+
+  desc "run all tests and display coverage"
+  task :run_all_display_coverage do
+    system %{
+      LOG_LEVEL="error" go test -v -coverpkg=./... -coverprofile=/tmp/all_tests.cov -v -race -failfast -p 1 ./... &&
+      go tool cover -html /tmp/all_tests.cov -o /tmp/all-tests.html &&
+      open -b org.mozilla.firefox /tmp/all-tests.html
+    }
+    exit $?.exitstatus
+  end
 end

@@ -1,6 +1,7 @@
 package kvstorehandler_test
 
 import (
+	"bytes"
 	"context"
 	"net/http"
 	"net/http/httptest"
@@ -30,6 +31,19 @@ func TestUpdateInvalidMethod(t *testing.T) {
 	}
 }
 
+func TestUpdateBodyReadError(t *testing.T) {
+	handler := kvstorehandler.New()
+	req := httptest.NewRequest(http.MethodPut, "/", &errorReader{})
+
+	w := httptest.NewRecorder()
+
+	handler.Update(w, req)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusBadRequest, w.Code)
+	}
+}
+
 func TestUpdateEmptyBody(t *testing.T) {
 	handler := kvstorehandler.New()
 	req := httptest.NewRequest(http.MethodPut, "/", nil)
@@ -44,6 +58,19 @@ func TestUpdateEmptyBody(t *testing.T) {
 	shouldContain := "empty body/payload"
 	if !strings.Contains(w.Body.String(), shouldContain) {
 		t.Errorf("wrong body message, want: %s, got: %s", shouldContain, w.Body.String())
+	}
+}
+
+func TestUpdateBodyUnmarshal(t *testing.T) {
+	handler := kvstorehandler.New()
+	handlerRequest := bytes.NewBufferString(`{"key": "key", "value": "123}`)
+	req := httptest.NewRequest(http.MethodPut, "/", handlerRequest)
+	w := httptest.NewRecorder()
+
+	handler.Update(w, req)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("wrong status code, want: %d, got: %d", http.StatusInternalServerError, w.Code)
 	}
 }
 

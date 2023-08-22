@@ -73,19 +73,21 @@ Available tasks:
 ```bash
 $ rake -T
 
-rake default            # default task
-rake docker:build       # Build image (locally)
-rake docker:run         # Run image (locally)
-rake lint               # run golangci lint
-rake release[revision]  # release new version major,minor,patch, default: patch
-rake run:server         # run server
-rake test:run_all       # run all tests
+rake default                        # default task
+rake docker:build                   # Build image (locally)
+rake docker:run                     # Run image (locally)
+rake lint                           # run golangci lint
+rake release[revision]              # release new version major,minor,patch, default: patch
+rake run:server                     # run server
+rake test:run_all                   # run all tests
+rake test:run_all_display_coverage  # run all tests and display coverage
 ```
 
-Run tests via;
+Run all tests via;
 
 ```bash
 rake test:run_all
+rake test:run_all_display_coverage  # macos only!
 ```
 
 ---
