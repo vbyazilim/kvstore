@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sync"
 	"syscall"
 	"time"
 
@@ -113,7 +112,7 @@ func New(options ...Option) error {
 
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/healthz/live", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/healthz/live/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -125,7 +124,7 @@ func New(options ...Option) error {
 		})
 		_, _ = w.Write(j)
 	})
-	mux.HandleFunc("/healthz/ready", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/healthz/ready/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 
@@ -156,8 +155,8 @@ func New(options ...Option) error {
 	apiError := make(chan error, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	var wg sync.WaitGroup
-	wg.Add(1)
+	// var wg sync.WaitGroup
+	// wg.Add(1)
 
 	go func() {
 		logger.Info("starting api server", "listening", api.Addr, "env", apisrvr.serverEnv)
@@ -181,8 +180,8 @@ func New(options ...Option) error {
 			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
 
-		wg.Done()
-		wg.Wait()
+		// wg.Done()
+		// wg.Wait()
 	}
 
 	return nil
