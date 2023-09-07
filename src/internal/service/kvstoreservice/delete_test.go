@@ -3,15 +3,17 @@ package kvstoreservice_test
 import (
 	"context"
 	"errors"
-	"strings"
 	"testing"
 
+	"github.com/vbyazilim/kvstore/src/internal/kverror"
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 )
 
 func TestDeleteWithCancel(t *testing.T) {
 	mockStorage := &mockStorage{}
-	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
+	kvsStoreService := kvstoreservice.New(
+		kvstoreservice.WithStorage(mockStorage),
+	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -23,23 +25,41 @@ func TestDeleteWithCancel(t *testing.T) {
 
 func TestDeleteWithStorageError(t *testing.T) {
 	mockStorage := &mockStorage{
-		deleteErr: errStorageDelete,
+		deleteErr: kverror.ErrKeyNotFound,
 	}
-	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
+	kvsStoreService := kvstoreservice.New(
+		kvstoreservice.WithStorage(mockStorage),
+	)
 
-	if err := kvsStoreService.Delete(context.Background(), "key"); !strings.Contains(
-		err.Error(),
-		"kvstoreservice.Set storage.Delete",
-	) {
+	err := kvsStoreService.Delete(context.Background(), "key")
+	if err == nil {
 		t.Error("error not occurred")
+	}
+
+	var kvErr *kverror.Error
+
+	if !errors.As(err, &kvErr) {
+		t.Error("error must be kverror.ErrKeyNotFound")
 	}
 }
 
 func TestDelete(t *testing.T) {
-	mockStorage := &mockStorage{}
-	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
+	mockStorage := &mockStorage{
+		memoryDB: map[string]any{
+			"key": "value",
+		},
+	}
+
+	kvsStoreService := kvstoreservice.New(
+		kvstoreservice.WithStorage(mockStorage),
+	)
 
 	if err := kvsStoreService.Delete(context.Background(), "key"); err != nil {
 		t.Error("error occurred")
+	}
+
+	_, ok := mockStorage.memoryDB["key"]
+	if ok {
+		t.Error("delete is not working!")
 	}
 }

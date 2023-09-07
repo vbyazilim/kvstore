@@ -28,14 +28,14 @@ go run cmd/server/main.go
 Endpoints:
 
 ```http
-GET    /healthz/live
-GET    /healthz/ready
+GET    /healthz/live/
+GET    /healthz/ready/
 
-POST   /api/v1/set
-GET    /api/v1/get?key={key}
-PUT    /api/v1/update
-DELETE /api/v1/delete?key={key}
-GET    /api/v1/list
+POST   /api/v1/set/
+GET    /api/v1/get/?key={key}
+PUT    /api/v1/update/
+DELETE /api/v1/delete/?key={key}
+GET    /api/v1/list/
 ```
 
 Also, you can use [postman](postman/KVStore.postman_collection.json) collection.

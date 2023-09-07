@@ -3,15 +3,17 @@ package kvstoreservice_test
 import (
 	"context"
 	"errors"
-	"strings"
 	"testing"
 
+	"github.com/vbyazilim/kvstore/src/internal/kverror"
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 )
 
 func TestUpdateWithCancel(t *testing.T) {
 	mockStorage := &mockStorage{}
-	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
+	kvsStoreService := kvstoreservice.New(
+		kvstoreservice.WithStorage(mockStorage),
+	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
@@ -23,19 +25,26 @@ func TestUpdateWithCancel(t *testing.T) {
 
 func TestUpdateWithStorageError(t *testing.T) {
 	mockStorage := &mockStorage{
-		updateErr: errStorageUpdate,
+		updateErr: kverror.ErrKeyNotFound, // raises kverror.ErrKeyNotFound
 	}
-	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
+	kvsStoreService := kvstoreservice.New(
+		kvstoreservice.WithStorage(mockStorage),
+	)
 
 	updateRequest := kvstoreservice.UpdateRequest{
 		Key:   "key",
 		Value: "value",
 	}
-	if _, err := kvsStoreService.Update(context.Background(), &updateRequest); !strings.Contains(
-		err.Error(),
-		"kvstoreservice.Set storage.Update",
-	) {
-		t.Error("error not occurred")
+
+	res, err := kvsStoreService.Update(context.Background(), &updateRequest)
+	if res != nil {
+		t.Errorf("response must be nil!")
+	}
+
+	var kvErr *kverror.Error
+
+	if !errors.As(err, &kvErr) {
+		t.Error("error must be kverror.ErrKeyNotFound")
 	}
 }
 
@@ -45,13 +54,29 @@ func TestUpdate(t *testing.T) {
 			"key": "value",
 		},
 	}
-	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
+	kvsStoreService := kvstoreservice.New(
+		kvstoreservice.WithStorage(mockStorage),
+	)
 
 	updateRequest := kvstoreservice.UpdateRequest{
 		Key:   "key",
-		Value: "value",
+		Value: "vigo",
 	}
-	if _, err := kvsStoreService.Update(context.Background(), &updateRequest); err != nil {
-		t.Error("error occurred")
+
+	res, err := kvsStoreService.Update(context.Background(), &updateRequest)
+	if err != nil {
+		t.Errorf("error occurred, err: %v", err)
+	}
+
+	if res == nil {
+		t.Error("result should not be nil")
+	}
+
+	if res != nil {
+		val := *res
+
+		if val.Value != "vigo" {
+			t.Errorf("want: vigo, got: %s", val.Value)
+		}
 	}
 }

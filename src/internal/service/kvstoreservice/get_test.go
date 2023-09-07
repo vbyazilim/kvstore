@@ -3,9 +3,9 @@ package kvstoreservice_test
 import (
 	"context"
 	"errors"
-	"strings"
 	"testing"
 
+	"github.com/vbyazilim/kvstore/src/internal/kverror"
 	"github.com/vbyazilim/kvstore/src/internal/service/kvstoreservice"
 )
 
@@ -23,23 +23,47 @@ func TestGetWithCancel(t *testing.T) {
 
 func TestGetWithStorageError(t *testing.T) {
 	mockStorage := &mockStorage{
-		getErr: errStorageGet,
+		getErr: kverror.ErrKeyNotFound, // get raises ErrKeyNotFound
 	}
 	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
 
-	if _, err := kvsStoreService.Get(context.Background(), "key"); !strings.Contains(
-		err.Error(),
-		"kvstoreservice.Set storage.Get",
-	) {
+	res, err := kvsStoreService.Get(context.Background(), "key")
+	if err == nil {
 		t.Error("error not occurred")
+	}
+
+	if res != nil {
+		t.Errorf("response must be nil!")
+	}
+
+	var kvErr *kverror.Error
+
+	if !errors.As(err, &kvErr) {
+		t.Error("error must be kverror.ErrKeyNotFound")
 	}
 }
 
 func TestGet(t *testing.T) {
-	mockStorage := &mockStorage{}
+	mockStorage := &mockStorage{
+		memoryDB: map[string]any{
+			"key": "value",
+		},
+	}
 	kvsStoreService := kvstoreservice.New(kvstoreservice.WithStorage(mockStorage))
 
-	if _, err := kvsStoreService.Get(context.Background(), "key"); err != nil {
+	res, err := kvsStoreService.Get(context.Background(), "key")
+	if err != nil {
 		t.Error("error occurred")
+	}
+
+	if res == nil {
+		t.Error("result should not be nil")
+	}
+
+	if res != nil {
+		val := *res
+		if val.Value != "value" {
+			t.Errorf("want: value, got: %s", val.Value)
+		}
 	}
 }
