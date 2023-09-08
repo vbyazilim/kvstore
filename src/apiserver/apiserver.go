@@ -155,9 +155,6 @@ func New(options ...Option) error {
 	apiError := make(chan error, 1)
 	signal.Notify(shutdown, syscall.SIGINT, syscall.SIGTERM)
 
-	// var wg sync.WaitGroup
-	// wg.Add(1)
-
 	go func() {
 		logger.Info("starting api server", "listening", api.Addr, "env", apisrvr.serverEnv)
 		apiError <- api.ListenAndServe()
@@ -179,9 +176,6 @@ func New(options ...Option) error {
 			}
 			return fmt.Errorf("could not stop server gracefully: %w", err)
 		}
-
-		// wg.Done()
-		// wg.Wait()
 	}
 
 	return nil
