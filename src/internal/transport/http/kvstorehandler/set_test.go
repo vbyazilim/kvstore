@@ -167,7 +167,7 @@ func TestSetErrUnknown(t *testing.T) {
 	}
 }
 
-func TestGetServiceUnknownError(t *testing.T) {
+func TestSetServiceUnknownError(t *testing.T) {
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{
 			getErr: kverror.ErrUnknown.AddData("fake error"),
@@ -186,7 +186,7 @@ func TestGetServiceUnknownError(t *testing.T) {
 	}
 }
 
-func TestGetServiceNilExistingItem(t *testing.T) {
+func TestSetServiceNilExistingItem(t *testing.T) {
 	handler := kvstorehandler.New(
 		kvstorehandler.WithService(&mockService{}),
 		kvstorehandler.WithLogger(logger),
