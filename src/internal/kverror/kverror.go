@@ -21,7 +21,7 @@ type KVError interface {
 	Error() string
 }
 
-// Error is a type alias, custom error.
+// Error is a custom type definition uses struct, custom error.
 type Error struct {
 	Err      error
 	Message  string
